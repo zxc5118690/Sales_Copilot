@@ -8,7 +8,8 @@ import {
     Target,
     BarChart3,
     Settings,
-    BookOpen
+    BookOpen,
+    Zap,
 } from 'lucide-react';
 
 const SidebarItem = ({ to, icon: Icon, label }) => (
@@ -16,7 +17,7 @@ const SidebarItem = ({ to, icon: Icon, label }) => (
         to={to}
         className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
     >
-        <Icon size={20} />
+        <Icon size={16} />
         <span>{label}</span>
     </NavLink>
 );
@@ -25,22 +26,37 @@ const Layout = () => {
     return (
         <div className="app-layout">
             <aside className="sidebar">
+                {/* Brand */}
                 <div className="sidebar-header">
-                    Sales Copilot
+                    <div className="sidebar-logo">
+                        <div className="sidebar-logo-icon">
+                            <Zap size={14} color="white" />
+                        </div>
+                        <div>
+                            <div className="sidebar-brand">Sales Copilot</div>
+                            <div className="sidebar-tagline">半導體設備 AI 助手</div>
+                        </div>
+                    </div>
                 </div>
-                <nav className="flex-col gap-md">
-                    <SidebarItem to="/" icon={LayoutDashboard} label="儀表板 (Dashboard)" />
-                    <SidebarItem to="/accounts" icon={Users} label="客戶名單 (Accounts)" />
-                    <SidebarItem to="/signals" icon={Radar} label="市場雷達 (Market Radar)" />
-                    <SidebarItem to="/pains" icon={Target} label="痛點分析 (Pain Extraction)" />
-                    <SidebarItem to="/outreach" icon={Mail} label="開發信 (Outreach)" />
-                    <SidebarItem to="/pipeline" icon={BarChart3} label="商機漏斗 (Pipeline)" />
-                    <SidebarItem to="/knowledge" icon={BookOpen} label="知識庫 (Knowledge Base)" />
-                    {/* Spacer to push settings to bottom */}
-                    <div style={{ flex: 1 }}></div>
-                    <SidebarItem to="/settings" icon={Settings} label="設定 (Settings)" />
+
+                {/* Nav */}
+                <nav className="sidebar-nav">
+                    <SidebarItem to="/" icon={LayoutDashboard} label="儀表板" />
+                    <SidebarItem to="/accounts" icon={Users} label="客戶名單" />
+                    <SidebarItem to="/signals" icon={Radar} label="市場雷達" />
+                    <SidebarItem to="/pains" icon={Target} label="痛點分析" />
+                    <SidebarItem to="/outreach" icon={Mail} label="開發信" />
+                    <SidebarItem to="/pipeline" icon={BarChart3} label="商機漏斗" />
+                    <SidebarItem to="/knowledge" icon={BookOpen} label="知識庫" />
+
+                    {/* Push Settings to bottom */}
+                    <div className="sidebar-spacer" />
+                    <div className="sidebar-footer">
+                        <SidebarItem to="/settings" icon={Settings} label="設定" />
+                    </div>
                 </nav>
             </aside>
+
             <main className="main-content">
                 <Outlet />
             </main>
