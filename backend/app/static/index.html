@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sales Copilot Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f7f4;
+      --bg-gradient-a: #dbe7d1;
+      --bg-gradient-b: #f8efe0;
+      --surface: #ffffff;
+      --surface-2: #f1f5ef;
+      --ink: #18211d;
+      --ink-muted: #5b675f;
+      --primary: #0e8a66;
+      --accent: #ef7d3b;
+      --danger: #bd3f3f;
+      --line: rgba(24, 33, 29, 0.12);
+      --shadow: 0 14px 38px rgba(24, 33, 29, 0.10);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Space Grotesk", "Noto Sans TC", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 88% 10%, rgba(239, 125, 59, 0.18), transparent 38%),
+        radial-gradient(circle at 14% 18%, rgba(14, 138, 102, 0.20), transparent 32%),
+        linear-gradient(145deg, var(--bg-gradient-a), var(--bg-gradient-b));
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+      background-size: 36px 36px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      width: min(1320px, 100% - 2.5rem);
+      margin: 1.4rem auto 2rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .panel {
+      background: color-mix(in srgb, var(--surface) 88%, transparent);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+      animation: rise-in 0.55s ease both;
+    }
+
+    .panel:nth-child(2) { animation-delay: 0.06s; }
+    .panel:nth-child(3) { animation-delay: 0.10s; }
+    .panel:nth-child(4) { animation-delay: 0.14s; }
+    .panel:nth-child(5) { animation-delay: 0.18s; }
+    .panel:nth-child(6) { animation-delay: 0.22s; }
+    .panel:nth-child(7) { animation-delay: 0.26s; }
+
+    @keyframes rise-in {
+      from { opacity: 0; transform: translateY(14px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .hero {
+      padding: 1.1rem 1.2rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .hero h1 {
+      margin: 0 0 0.3rem;
+      font-size: clamp(1.35rem, 3vw, 2rem);
+      letter-spacing: 0.02em;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--ink-muted);
+      font-size: 0.94rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      background: color-mix(in srgb, var(--primary) 15%, white);
+      color: color-mix(in srgb, var(--primary) 75%, black);
+      border: 1px solid color-mix(in srgb, var(--primary) 32%, transparent);
+      padding: 0.35rem 0.62rem;
+      border-radius: 999px;
+      font-size: 0.77rem;
+      font-family: "IBM Plex Mono", monospace;
+      letter-spacing: 0.03em;
+    }
+
+    .badge.offline {
+      background: color-mix(in srgb, var(--danger) 12%, white);
+      color: color-mix(in srgb, var(--danger) 70%, black);
+      border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.7rem;
+      padding: 0.9rem 1rem 1.1rem;
+      border-top: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0));
+    }
+
+    .metric {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 0.66rem 0.72rem;
+    }
+
+    .metric .label {
+      margin: 0;
+      font-size: 0.74rem;
+      color: var(--ink-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .metric .value {
+      margin: 0.24rem 0 0;
+      font-size: 1.26rem;
+      font-weight: 700;
+      font-family: "IBM Plex Mono", monospace;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(12, 1fr);
+    }
+
+    .pipeline { grid-column: span 12; }
+    .accounts { grid-column: span 7; }
+    .contacts { grid-column: span 5; }
+    .ops { grid-column: span 6; }
+    .details { grid-column: span 6; }
+    .activity { grid-column: span 12; }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.84rem 0.95rem;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.8), rgba(241, 245, 239, 0.55));
+    }
+
+    .section-head h2, .section-head h3 {
+      margin: 0;
+      font-size: 0.96rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .section-body {
+      padding: 0.88rem 0.95rem 1rem;
+    }
+
+    .pipeline-columns {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+      align-items: start;
+    }
+
+    .stage-column {
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      min-height: 110px;
+      padding: 0.58rem;
+    }
+
+    .stage-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.74rem;
+      color: var(--ink-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .ticket {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem;
+      margin-bottom: 0.48rem;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .ticket:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(24, 33, 29, 0.12);
+    }
+
+    .ticket h4 {
+      margin: 0 0 0.25rem;
+      font-size: 0.89rem;
+    }
+
+    .mini {
+      margin: 0;
+      color: var(--ink-muted);
+      font-size: 0.74rem;
+      font-family: "IBM Plex Mono", monospace;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 0.48rem 0.38rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--ink-muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    tbody tr {
+      cursor: pointer;
+      transition: background-color 0.16s ease;
+    }
+
+    tbody tr:hover {
+      background: rgba(14, 138, 102, 0.10);
+    }
+
+    tbody tr.selected {
+      background: rgba(14, 138, 102, 0.16);
+    }
+
+    .form-grid {
+      margin-top: 0.7rem;
+      display: grid;
+      gap: 0.5rem;
+      grid-template-columns: repeat(6, 1fr);
+    }
+
+    .form-grid.wide {
+      grid-template-columns: repeat(8, 1fr);
+    }
+
+    input, select, textarea, button {
+      font: inherit;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 0.42rem 0.52rem;
+      color: var(--ink);
+    }
+
+    textarea {
+      min-height: 78px;
+      resize: vertical;
+    }
+
+    button {
+      border: 1px solid transparent;
+      border-radius: 11px;
+      padding: 0.5rem 0.68rem;
+      cursor: pointer;
+      transition: transform 0.14s ease, box-shadow 0.14s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(120deg, color-mix(in srgb, var(--primary) 90%, black), var(--primary));
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(14, 138, 102, 0.25);
+    }
+
+    .btn-secondary {
+      background: var(--surface-2);
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    .btn-accent {
+      background: linear-gradient(120deg, color-mix(in srgb, var(--accent) 85%, black), var(--accent));
+      color: #fff;
+      box-shadow: 0 9px 20px rgba(239, 125, 59, 0.24);
+    }
+
+    .span-1 { grid-column: span 1; }
+    .span-2 { grid-column: span 2; }
+    .span-3 { grid-column: span 3; }
+    .span-4 { grid-column: span 4; }
+    .span-5 { grid-column: span 5; }
+    .span-6 { grid-column: span 6; }
+    .span-8 { grid-column: span 8; }
+
+    .ops-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.76rem;
+    }
+
+    .op-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--surface-2);
+      padding: 0.66rem;
+    }
+
+    .op-card h4 {
+      margin: 0 0 0.55rem;
+      font-size: 0.82rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .list-stack {
+      display: grid;
+      gap: 0.56rem;
+    }
+
+    .list-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      padding: 0.55rem;
+    }
+
+    .list-card h5 {
+      margin: 0 0 0.2rem;
+      font-size: 0.86rem;
+    }
+
+    .list-card p {
+      margin: 0.2rem 0;
+      font-size: 0.84rem;
+      color: var(--ink-muted);
+    }
+
+    .mono {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.77rem;
+    }
+
+    .status-row {
+      margin-top: 0.4rem;
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .activity-log {
+      margin: 0;
+      background: #141915;
+      color: #e1f1df;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.76rem;
+      max-height: 280px;
+      overflow: auto;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.75rem;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    .empty {
+      color: var(--ink-muted);
+      margin: 0;
+      font-size: 0.82rem;
+    }
+
+    .hint {
+      font-size: 0.77rem;
+      color: var(--ink-muted);
+      margin: 0 0 0.55rem;
+    }
+
+    @media (max-width: 1180px) {
+      .accounts, .contacts, .ops, .details {
+        grid-column: span 12;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        width: min(1320px, 100% - 1rem);
+      }
+      .hero {
+        padding: 0.88rem;
+      }
+      .section-head {
+        padding: 0.76rem 0.8rem;
+      }
+      .section-body {
+        padding: 0.75rem 0.8rem 0.9rem;
+      }
+      .form-grid,
+      .form-grid.wide {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .span-3, .span-4, .span-5, .span-6, .span-8 {
+        grid-column: span 2;
+      }
+      .span-2 {
+        grid-column: span 1;
+      }
+      .ops-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="panel">
+      <div class="hero">
+        <div>
+          <h1>AI 銷售 Copilot 指揮中心</h1>
+          <p>把帳戶、聯絡人、Signals、Pain、Outreach、BANT 放在同一視圖快速操作。</p>
+        </div>
+        <div class="hero-actions">
+          <span id="health-badge" class="badge offline">API 離線</span>
+          <button id="refresh-all" class="btn-primary" type="button">重新整理儀表板</button>
+        </div>
+      </div>
+      <div class="metric-grid">
+        <article class="metric"><p class="label">統計區間</p><p id="metric-window" class="value">-</p></article>
+        <article class="metric"><p class="label">外呼數</p><p id="metric-outbound" class="value">0</p></article>
+        <article class="metric"><p class="label">內呼數</p><p id="metric-inbound" class="value">0</p></article>
+        <article class="metric"><p class="label">觸達帳戶數</p><p id="metric-touched" class="value">0</p></article>
+        <article class="metric"><p class="label">草稿數</p><p id="metric-drafts" class="value">0</p></article>
+        <article class="metric"><p class="label">BANT A / B / C</p><p id="metric-bant" class="value">0 / 0 / 0</p></article>
+      </div>
+    </section>
+
+    <section class="grid">
+      <section class="panel pipeline">
+        <div class="section-head">
+          <h2>Pipeline 看板</h2>
+          <button id="reload-pipeline" class="btn-secondary" type="button">重新載入</button>
+        </div>
+        <div class="section-body">
+          <div id="pipeline-board" class="pipeline-columns"></div>
+        </div>
+      </section>
+
+      <section class="panel accounts">
+        <div class="section-head">
+          <h3>帳戶</h3>
+          <button id="reload-accounts" class="btn-secondary" type="button">重新載入</button>
+        </div>
+        <div class="section-body">
+          <p class="hint">點選一列會設為目前帳戶，並自動帶入 Signals / Pain / BANT 查詢。</p>
+          <div style="overflow:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>公司</th>
+                  <th>市場別</th>
+                  <th>區域</th>
+                  <th>等級</th>
+                </tr>
+              </thead>
+              <tbody id="accounts-body"></tbody>
+            </table>
+          </div>
+          <p class="hint" style="margin-top:0.7rem;">建立新帳戶</p>
+          <form id="account-form" class="form-grid wide">
+            <input class="span-3" name="company_name" placeholder="公司名稱" required>
+            <input class="span-2" name="segment" value="AR_VR" placeholder="市場別" required>
+            <input class="span-1" name="region" value="TW" placeholder="區域">
+            <input class="span-2" name="website" placeholder="https://company.com">
+            <select class="span-1" name="priority_tier">
+              <option value="T1">T1</option>
+              <option value="T2">T2</option>
+              <option value="T3" selected>T3</option>
+            </select>
+            <button class="span-2 btn-accent" type="submit">建立帳戶</button>
+          </form>
+          <p class="hint" style="margin-top:0.7rem;">維護選取帳戶</p>
+          <form id="account-edit-form" class="form-grid wide">
+            <input class="span-1" name="id" id="account-edit-id" placeholder="ID" readonly>
+            <input class="span-2" name="company_name" id="account-edit-company_name" placeholder="公司名稱">
+            <input class="span-1" name="segment" id="account-edit-segment" placeholder="市場別">
+            <input class="span-1" name="region" id="account-edit-region" placeholder="區域">
+            <input class="span-2" name="website" id="account-edit-website" placeholder="https://company.com">
+            <select class="span-1" name="priority_tier" id="account-edit-priority_tier">
+              <option value="">-</option>
+              <option value="T1">T1</option>
+              <option value="T2">T2</option>
+              <option value="T3">T3</option>
+            </select>
+            <button class="span-1 btn-primary" type="submit">更新</button>
+            <button class="span-1 btn-secondary" type="button" id="delete-account-btn">刪除</button>
+          </form>
+          <p class="hint" style="margin-top:0.7rem;">CSV 批次匯入帳戶（需含 company_name,segment）</p>
+          <form id="account-import-form" class="form-grid wide">
+            <input class="span-4" type="file" id="account-import-file" accept=".csv,text/csv">
+            <input class="span-2" name="source" id="account-import-source" placeholder="source (預設 web_import)">
+            <button class="span-2 btn-primary" type="submit">匯入 CSV</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel contacts">
+        <div class="section-head">
+          <h3>聯絡人</h3>
+          <button id="reload-contacts" class="btn-secondary" type="button">重新載入</button>
+        </div>
+        <div class="section-body">
+          <p class="hint">聯絡人會依目前帳戶過濾；點選後會成為 Outreach / Interaction 的目標。</p>
+          <div style="overflow:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>帳戶</th>
+                  <th>姓名</th>
+                  <th>Email</th>
+                  <th>分數</th>
+                </tr>
+              </thead>
+              <tbody id="contacts-body"></tbody>
+            </table>
+          </div>
+          <p class="hint" style="margin-top:0.7rem;">建立新聯絡人</p>
+          <form id="contact-form" class="form-grid">
+            <select class="span-3" name="account_id" id="contact-account-id" required></select>
+            <input class="span-3" name="full_name" placeholder="姓名">
+            <input class="span-3" name="role_title" placeholder="職稱">
+            <input class="span-3" name="channel_email" placeholder="Email">
+            <input class="span-2" name="channel_linkedin" placeholder="LinkedIn URL">
+            <input class="span-2" name="contactability_score" type="number" min="0" max="100" value="70" placeholder="分數">
+            <button class="span-2 btn-accent" type="submit">建立聯絡人</button>
+          </form>
+          <p class="hint" style="margin-top:0.7rem;">維護選取聯絡人</p>
+          <form id="contact-edit-form" class="form-grid">
+            <input class="span-1" name="id" id="contact-edit-id" placeholder="ID" readonly>
+            <input class="span-2" name="full_name" id="contact-edit-full_name" placeholder="姓名">
+            <input class="span-2" name="role_title" id="contact-edit-role_title" placeholder="職稱">
+            <input class="span-3" name="channel_email" id="contact-edit-channel_email" placeholder="Email">
+            <input class="span-3" name="channel_linkedin" id="contact-edit-channel_linkedin" placeholder="LinkedIn URL">
+            <input class="span-1" name="contactability_score" id="contact-edit-contactability_score" type="number" min="0" max="100" placeholder="分數">
+            <button class="span-1 btn-primary" type="submit">更新</button>
+            <button class="span-2 btn-secondary" type="button" id="delete-contact-btn">刪除</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel ops">
+        <div class="section-head">
+          <h3>操作台</h3>
+        </div>
+        <div class="section-body">
+          <div class="ops-grid">
+            <article class="op-card">
+              <h4>掃描 Signals</h4>
+              <form id="signals-form" class="form-grid">
+                <input class="span-6" name="account_ids" id="signals-account-ids" placeholder="帳戶 ID：1,2,3">
+                <input class="span-3" name="lookback_days" type="number" min="1" max="365" value="90">
+                <input class="span-3" name="max_results_per_account" type="number" min="1" max="20" value="8">
+                <button class="span-6 btn-primary" type="submit">執行掃描</button>
+              </form>
+            </article>
+
+            <article class="op-card">
+              <h4>產生 Pain Profiles</h4>
+              <form id="pain-form" class="form-grid">
+                <input class="span-3" name="account_id" id="pain-account-id" type="number" min="1" placeholder="帳戶 ID">
+                <input class="span-3" name="persona_targets" value="RD,NPI" placeholder="RD,NPI">
+                <input class="span-3" name="max_items" type="number" min="1" max="8" value="3">
+                <button class="span-3 btn-primary" type="submit">產生</button>
+              </form>
+            </article>
+
+            <article class="op-card">
+              <h4>BANT 評分</h4>
+              <form id="bant-form" class="form-grid">
+                <input class="span-3" name="account_id" id="bant-account-id" type="number" min="1" placeholder="帳戶 ID">
+                <input class="span-3" name="lookback_days" type="number" min="7" max="365" value="60">
+                <button class="span-6 btn-primary" type="submit">評分</button>
+              </form>
+            </article>
+
+            <article class="op-card">
+              <h4>產生 Outreach 草稿</h4>
+              <form id="outreach-form" class="form-grid">
+                <input class="span-3" name="contact_id" id="outreach-contact-id" type="number" min="1" placeholder="聯絡人 ID">
+                <select class="span-3" name="channel">
+                  <option value="EMAIL">EMAIL</option>
+                  <option value="LINKEDIN">LINKEDIN</option>
+                </select>
+                <select class="span-3" name="intent">
+                  <option value="FIRST_TOUCH">FIRST_TOUCH</option>
+                  <option value="FOLLOW_UP">FOLLOW_UP</option>
+                  <option value="REPLY">REPLY</option>
+                </select>
+                <select class="span-3" name="tone">
+                  <option value="TECHNICAL">TECHNICAL</option>
+                  <option value="CONSULTATIVE">CONSULTATIVE</option>
+                  <option value="EXECUTIVE">EXECUTIVE</option>
+                </select>
+                <button class="span-6 btn-primary" type="submit">建立草稿</button>
+              </form>
+            </article>
+
+            <article class="op-card" style="grid-column: 1 / -1;">
+              <h4>紀錄互動</h4>
+              <form id="interaction-form" class="form-grid wide">
+                <input class="span-2" name="contact_id" id="interaction-contact-id" type="number" min="1" placeholder="聯絡人 ID">
+                <select class="span-2" name="channel">
+                  <option value="EMAIL">EMAIL</option>
+                  <option value="LINKEDIN">LINKEDIN</option>
+                </select>
+                <select class="span-2" name="direction">
+                  <option value="INBOUND">INBOUND</option>
+                  <option value="OUTBOUND">OUTBOUND</option>
+                </select>
+                <select class="span-2" name="sentiment">
+                  <option value="POSITIVE">POSITIVE</option>
+                  <option value="NEUTRAL">NEUTRAL</option>
+                  <option value="NEGATIVE">NEGATIVE</option>
+                </select>
+                <textarea class="span-8" name="content_summary" placeholder="例如：客戶詢問試產線時程與良率基線。" required></textarea>
+                <button class="span-8 btn-primary" type="submit">送出互動紀錄</button>
+              </form>
+            </article>
+
+            <article class="op-card">
+              <h4>一鍵 E2E 流程</h4>
+              <form id="e2e-form" class="form-grid">
+                <input class="span-3" name="account_id" id="e2e-account-id" type="number" min="1" placeholder="帳戶 ID">
+                <input class="span-3" name="contact_id" id="e2e-contact-id" type="number" min="1" placeholder="聯絡人 ID（可空）">
+                <input class="span-3" name="lookback_days" type="number" min="1" max="365" value="90">
+                <input class="span-3" name="max_results_per_account" type="number" min="1" max="20" value="8">
+                <input class="span-3" name="persona_targets" value="RD,NPI" placeholder="RD,NPI">
+                <input class="span-3" name="max_items" type="number" min="1" max="8" value="3">
+                <select class="span-3" name="channel">
+                  <option value="EMAIL">EMAIL</option>
+                  <option value="LINKEDIN">LINKEDIN</option>
+                </select>
+                <select class="span-3" name="intent">
+                  <option value="FIRST_TOUCH">FIRST_TOUCH</option>
+                  <option value="FOLLOW_UP">FOLLOW_UP</option>
+                  <option value="REPLY">REPLY</option>
+                </select>
+                <select class="span-3" name="tone">
+                  <option value="TECHNICAL">TECHNICAL</option>
+                  <option value="CONSULTATIVE">CONSULTATIVE</option>
+                  <option value="EXECUTIVE">EXECUTIVE</option>
+                </select>
+                <select class="span-3" name="interaction_channel">
+                  <option value="EMAIL">EMAIL</option>
+                  <option value="LINKEDIN">LINKEDIN</option>
+                  <option value="MEETING">MEETING</option>
+                  <option value="CALL">CALL</option>
+                </select>
+                <select class="span-3" name="direction">
+                  <option value="INBOUND">INBOUND</option>
+                  <option value="OUTBOUND">OUTBOUND</option>
+                </select>
+                <select class="span-3" name="sentiment">
+                  <option value="POSITIVE">POSITIVE</option>
+                  <option value="NEUTRAL">NEUTRAL</option>
+                  <option value="NEGATIVE">NEGATIVE</option>
+                </select>
+                <input class="span-3" name="lookback_bant" type="number" min="7" max="365" value="60">
+                <textarea class="span-6" name="summary" placeholder="互動摘要">Customer discusses capex, pilot timeline, and quality improvements for NPI.</textarea>
+                <button class="span-6 btn-accent" type="submit">執行一鍵 E2E</button>
+              </form>
+            </article>
+
+            <article class="op-card">
+              <h4>Demo Report</h4>
+              <form id="demo-report-form" class="form-grid">
+                <input class="span-3" name="account_id" id="demo-report-account-id" type="number" min="1" placeholder="帳戶 ID">
+                <button class="span-3 btn-primary" type="submit">產生報告預覽</button>
+                <button class="span-6 btn-secondary" type="button" id="download-demo-report-btn">下載 Markdown</button>
+              </form>
+              <textarea id="demo-report-output" style="margin-top:0.6rem;" placeholder="報告內容會顯示在這裡"></textarea>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel details">
+        <div class="section-head">
+          <h3>洞察</h3>
+          <span id="selection-label" class="badge">帳戶：- | 聯絡人：-</span>
+        </div>
+        <div class="section-body">
+          <div class="list-stack">
+            <section>
+              <p class="hint">Signals</p>
+              <div id="signals-list" class="list-stack"></div>
+            </section>
+            <section>
+              <p class="hint">Pain 檔案</p>
+              <div id="pain-list" class="list-stack"></div>
+            </section>
+            <section>
+              <p class="hint">BANT 歷史</p>
+              <div id="bant-list" class="list-stack"></div>
+            </section>
+            <section>
+              <p class="hint">Outreach 草稿</p>
+              <div id="outreach-list" class="list-stack"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel activity">
+        <div class="section-head">
+          <h3>操作記錄</h3>
+          <button id="clear-log" class="btn-secondary" type="button">清除</button>
+        </div>
+        <div class="section-body">
+          <pre id="activity-log" class="activity-log"></pre>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

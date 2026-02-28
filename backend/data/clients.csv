@@ -1,0 +1,11 @@
+id,company_name,segment,region,website,source,priority_tier
+1,玉晶光 (GSEO),AR_VR,Taiwan,https://www.gseo.com,manual,T1
+2,禾賽科技 (Hesai),LIDAR_3D,China,https://www.hesaitech.com,import,T1
+3,致伸科技 (Primax),CAMERA,Taiwan,https://www.primax.com.tw,manual,T2
+4,同欣電 (Tong Hsing),SEMICONDUCTOR,Taiwan,https://www.theil.com,linkedin,T2
+5,揚明光 (Young Optics),AR_VR,Taiwan,https://www.youngoptics.com,manual,T1
+6,亞光 (Asia Optical),AR_VR,Taiwan,https://www.asia-optical.com,referral,T1
+7,佐臻 (Jorjin),AR_VR,Taiwan,https://www.jorjin.com,manual,T2
+8,啟碁科技 (WNC),CAMERA,Taiwan,https://www.wnc.com.tw,tavily,T1
+9,速騰聚創 (RoboSense),LIDAR_3D,China,https://www.robosense.ai,import,T1
+10,佳凌科技 (Ability Opto),CAMERA,Taiwan,https://www.ability-optics.com.tw,linkedin,T2
